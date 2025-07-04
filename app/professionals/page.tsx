@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,84 +8,62 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, Clock, Video, MessageCircle, Search, Filter } from "lucide-react"
-
-const professionals = [
-  {
-    id: 1,
-    name: "Dr. Sarah Johnson",
-    title: "Clinical Psychologist",
-    specialties: ["Anxiety", "Depression", "CBT"],
-    rating: 4.9,
-    reviews: 127,
-    experience: "8 years",
-    languages: ["English", "Spanish"],
-    availability: "Available today",
-    price: "$120/session",
-    image: "/placeholder.svg?height=100&width=100",
-    bio: "Specializing in cognitive behavioral therapy with a focus on anxiety and depression treatment.",
-    verified: true,
-  },
-  {
-    id: 2,
-    name: "Dr. Michael Chen",
-    title: "Licensed Therapist",
-    specialties: ["Trauma", "PTSD", "Couples Therapy"],
-    rating: 4.8,
-    reviews: 89,
-    experience: "12 years",
-    languages: ["English", "Mandarin"],
-    availability: "Next available: Tomorrow",
-    price: "$100/session",
-    image: "/placeholder.svg?height=100&width=100",
-    bio: "Expert in trauma-informed therapy and relationship counseling with extensive experience.",
-    verified: true,
-  },
-  {
-    id: 3,
-    name: "Dr. Emily Rodriguez",
-    title: "Psychiatrist",
-    specialties: ["Bipolar", "Medication Management", "Adult ADHD"],
-    rating: 4.7,
-    reviews: 156,
-    experience: "10 years",
-    languages: ["English", "Spanish", "Portuguese"],
-    availability: "Available this week",
-    price: "$150/session",
-    image: "/placeholder.svg?height=100&width=100",
-    bio: "Board-certified psychiatrist specializing in mood disorders and medication management.",
-    verified: true,
-  },
-  {
-    id: 4,
-    name: "Dr. James Wilson",
-    title: "Licensed Counselor",
-    specialties: ["Addiction", "Family Therapy", "Grief Counseling"],
-    rating: 4.6,
-    reviews: 73,
-    experience: "6 years",
-    languages: ["English"],
-    availability: "Available today",
-    price: "$90/session",
-    image: "/placeholder.svg?height=100&width=100",
-    bio: "Compassionate counselor with expertise in addiction recovery and family dynamics.",
-    verified: true,
-  },
-]
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function ProfessionalsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties")
   const [selectedLanguage, setSelectedLanguage] = useState("All Languages")
+  const [professionals, setProfessionals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfessionals = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "professionals"));
+        const professionalsList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProfessionals(professionalsList);
+      } catch (err) {
+        console.error("Error fetching professionals:", err);
+        setError("Failed to load professionals. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfessionals();
+  }, []);
 
   const filteredProfessionals = professionals.filter((prof) => {
     const matchesSearch =
-      prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      prof.specialties.some((s) => s.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesSpecialty = selectedSpecialty === "All Specialties" || prof.specialties.includes(selectedSpecialty)
-    const matchesLanguage = selectedLanguage === "All Languages" || prof.languages.includes(selectedLanguage)
+      (prof.name && prof.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (prof.specialties && prof.specialties.some((s: string) => s && s.toLowerCase().includes(searchTerm.toLowerCase())))
+    const matchesSpecialty = selectedSpecialty === "All Specialties" || (prof.specialties && prof.specialties.includes(selectedSpecialty))
+    const matchesLanguage = selectedLanguage === "All Languages" || (prof.languages && prof.languages.includes(selectedLanguage))
 
     return matchesSearch && matchesSpecialty && matchesLanguage
   })
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p>Loading professionals...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-red-500">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,9 +136,11 @@ export default function ProfessionalsPage() {
                     <AvatarImage src={professional.image || "/placeholder.svg"} alt={professional.name} />
                     <AvatarFallback>
                       {professional.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                        ? professional.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                        : ""}
                     </AvatarFallback>
                   </Avatar>
 
@@ -200,7 +180,14 @@ export default function ProfessionalsPage() {
 
                     <div className="flex items-center justify-between">
                       <div className="text-sm text-gray-600">
-                        <p className="font-medium text-green-600">{professional.availability}</p>
+                        <p className="font-medium text-green-600">
+                          {professional.availability
+                            ? Object.entries(professional.availability)
+                                .filter(([, available]) => available)
+                                .map(([day]) => day.charAt(0).toUpperCase() + day.slice(1))
+                                .join(", ")
+                            : "N/A"}
+                        </p>
                         <p>{professional.price}</p>
                       </div>
 

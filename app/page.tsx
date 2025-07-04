@@ -8,38 +8,6 @@ import { MoodTracker } from "@/components/mood-tracker"
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Navigation */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Heart className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">MindCare</span>
-          </div>
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/professionals" className="text-gray-600 hover:text-blue-600">
-              Find Professionals
-            </Link>
-            <Link href="/resources" className="text-gray-600 hover:text-blue-600">
-              Resources
-            </Link>
-            <Link href="/about" className="text-gray-600 hover:text-blue-600">
-              About
-            </Link>
-            <Link href="/emergency" className="text-red-600 hover:text-red-700 font-medium">
-              Emergency Help
-            </Link>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Link href="/auth/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center max-w-4xl mx-auto">

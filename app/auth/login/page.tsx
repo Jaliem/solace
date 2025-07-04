@@ -1,19 +1,35 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Heart, Mail, Lock } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heart, Mail, Lock } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [userType, setUserType] = useState("patient")
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("patient");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSignIn = async () => {
+    setErrorMessage(null); // Clear previous errors
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/"); // Redirect to main page
+    } catch (error: any) {
+      console.error("Error signing in:", error);
+      setErrorMessage(error.message || "Error signing in. Please check your credentials.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
@@ -74,7 +90,11 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <Button className="w-full" size="lg">
+            {errorMessage && (
+              <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+            )}
+
+            <Button className="w-full" size="lg" onClick={handleSignIn}>
               Sign In
             </Button>
 

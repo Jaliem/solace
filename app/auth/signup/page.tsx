@@ -1,17 +1,20 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Heart, Mail, Lock, Phone } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Heart, Mail, Lock, Phone } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,12 +23,53 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
     agreeToTerms: false,
-  })
-  const [userType, setUserType] = useState("patient")
+  });
+  const [userType, setUserType] = useState("patient");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSignUp = async () => {
+    setErrorMessage(null); // Clear previous errors
+    setSuccessMessage(null); // Clear previous success messages
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          userType: userType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessMessage(data.message);
+        router.push('/auth/login'); // Redirect to login page
+        // Optionally clear form data here: setFormData(...initialState);
+      } else {
+        setErrorMessage(data.message || "Error signing up. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error signing up:", error);
+      setErrorMessage("Error signing up. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
@@ -148,7 +192,14 @@ export default function SignupPage() {
               </Label>
             </div>
 
-            <Button className="w-full" size="lg" disabled={!formData.agreeToTerms}>
+            {errorMessage && (
+              <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+            )}
+            {successMessage && (
+              <p className="text-green-500 text-sm text-center">{successMessage}</p>
+            )}
+
+            <Button className="w-full" size="lg" disabled={!formData.agreeToTerms} onClick={handleSignUp}>
               Create Account
             </Button>
 
