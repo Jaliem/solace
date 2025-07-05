@@ -54,7 +54,8 @@ interface UserData {
 
 interface ProfessionalData {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   title: string;
   specialties: string[];
   status: "pending" | "approved" | "rejected" | "suspended";
@@ -103,28 +104,28 @@ export default function AdminDashboard() {
       // Fetch Users
       const usersSnapshot = await getDocs(collection(db, "users"));
       const usersList: UserData[] = usersSnapshot.docs.map((doc) => ({
-        id: doc.id, // Explicitly get the document ID
         ...(doc.data() as Omit<UserData, 'id'>), // Spread the rest of the data, omitting 'id' if it somehow exists there
+        id: doc.id, // Explicitly get the document ID
       }));
       setUsers(usersList);
 
       // Fetch Professionals
       const professionalsSnapshot = await getDocs(collection(db, "professionals"));
       const professionalsList: ProfessionalData[] = professionalsSnapshot.docs.map((doc) => ({
-        id: doc.id,
         ...(doc.data() as ProfessionalData),
+        id: doc.id,
       }));
       setProfessionals(professionalsList);
 
       // Fetch Sessions (assuming a 'sessions' collection exists)
       const sessionsSnapshot = await getDocs(collection(db, "sessions"));
       const sessionsList: SessionData[] = sessionsSnapshot.docs.map((doc) => ({
-        id: doc.id,
         ...(doc.data() as SessionData),
+        id: doc.id,
       }));
       setSessions(sessionsList);
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching dashboard data:", err);
       setError(`Failed to load dashboard data: ${err.message || err}`);
     } finally {
@@ -152,7 +153,7 @@ export default function AdminDashboard() {
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, { status: newStatus });
       setUsers(users.map((u) => (u.id === userId ? { ...u, status: newStatus } : u)));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating user status:", err);
       setError("Failed to update user status.");
     }
@@ -164,7 +165,7 @@ export default function AdminDashboard() {
       const professionalRef = doc(db, "professionals", professionalId);
       await updateDoc(professionalRef, { status: newStatus });
       setProfessionals(professionals.map((p) => (p.id === professionalId ? { ...p, status: newStatus } : p)));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating professional status:", err);
       setError("Failed to update professional status.");
     }
@@ -510,19 +511,16 @@ export default function AdminDashboard() {
                     >
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={professional.image || "/placeholder.svg"} alt={professional.name} />
+                          <AvatarImage src={professional.image || "/placeholder.svg"} alt={`${professional.firstName} ${professional.lastName}`} />
                           <AvatarFallback>
-                            {professional.name
-                              ? professional.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
+                            {professional.firstName && professional.lastName
+                              ? `${professional.firstName[0]}${professional.lastName[0]}`
                               : ""}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="font-semibold text-gray-900">{professional.name}</h3>
+                            <h3 className="font-semibold text-gray-900">{`${professional.firstName} ${professional.lastName}`}</h3>
                             <Badge className={getStatusColor(professional.status)}>{professional.status}</Badge>
                           </div>
                           <p className="text-sm text-gray-600 mb-1">{professional.title}</p>
@@ -572,14 +570,18 @@ export default function AdminDashboard() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <Link href={`/professionals/${professional.id}`}>
                             <DropdownMenuItem>
                               <Eye className="h-4 w-4 mr-2" />
                               View Profile
                             </DropdownMenuItem>
+                            </Link>
+                            <Link href={`/admin/edit-professional/${professional.id}`}>
                             <DropdownMenuItem>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit Details
                             </DropdownMenuItem>
+                            </Link>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-red-600">
                               <Trash2 className="h-4 w-4 mr-2" />

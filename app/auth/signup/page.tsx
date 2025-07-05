@@ -77,7 +77,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-4">
             <Heart className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">MindCare</span>
+            <span className="text-2xl font-bold text-gray-900">Solace</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
           <p className="text-gray-600">Start your mental health journey today</p>

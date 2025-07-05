@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, Clock, Video, MessageCircle, Search, Filter } from "lucide-react"
+import Link from "next/link"
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -40,8 +41,9 @@ export default function ProfessionalsPage() {
   }, []);
 
   const filteredProfessionals = professionals.filter((prof) => {
+    const fullName = `${prof.firstName} ${prof.lastName}`;
     const matchesSearch =
-      (prof.name && prof.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (prof.specialties && prof.specialties.some((s: string) => s && s.toLowerCase().includes(searchTerm.toLowerCase())))
     const matchesSpecialty = selectedSpecialty === "All Specialties" || (prof.specialties && prof.specialties.includes(selectedSpecialty))
     const matchesLanguage = selectedLanguage === "All Languages" || (prof.languages && prof.languages.includes(selectedLanguage))
@@ -129,24 +131,22 @@ export default function ProfessionalsPage() {
         {/* Results */}
         <div className="grid lg:grid-cols-2 gap-6">
           {filteredProfessionals.map((professional) => (
-            <Card key={professional.id} className="hover:shadow-md transition-shadow">
+            <Link href={`/professionals/${professional.id}`} key={professional.id}>
+            <Card className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={professional.image || "/placeholder.svg"} alt={professional.name} />
+                    <AvatarImage src={professional.image || "/placeholder.svg"} alt={`${professional.firstName} ${professional.lastName}`} />
                     <AvatarFallback>
-                      {professional.name
-                        ? professional.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
+                      {professional.firstName && professional.lastName
+                        ? `${professional.firstName[0]}${professional.lastName[0]}`
                         : ""}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="text-lg font-semibold">{professional.name}</h3>
+                      <h3 className="text-lg font-semibold">{`${professional.firstName} ${professional.lastName}`}</h3>
                       {professional.verified && (
                         <Badge variant="secondary" className="bg-green-100 text-green-800">
                           ✓ Verified
@@ -169,7 +169,7 @@ export default function ProfessionalsPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {professional.specialties.map((specialty) => (
+                      {professional.specialties.map((specialty: string) => (
                         <Badge key={specialty} variant="outline" className="text-xs">
                           {specialty}
                         </Badge>
@@ -207,6 +207,7 @@ export default function ProfessionalsPage() {
                 </div>
               </CardContent>
             </Card>
+          </Link>
           ))}
         </div>
 

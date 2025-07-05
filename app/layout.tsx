@@ -8,7 +8,7 @@ import { MainNav } from "@/components/main-nav";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MindCare - Mental Health Platform",
+  title: "Solace - Mental Health Platform",
   description:
     "Connect with licensed psychologists and counselors, track your emotional well-being, and access self-care tools and resources.",
   generator: 'v0.dev',

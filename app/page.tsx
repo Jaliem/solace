@@ -84,7 +84,7 @@ export default function HomePage() {
       {/* Features */}
       <section className="bg-white py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose MindCare?</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Solace?</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <Shield className="h-16 w-16 text-blue-600 mx-auto mb-4" />
@@ -133,7 +133,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <Heart className="h-6 w-6" />
-                <span className="text-xl font-bold">MindCare</span>
+                <span className="text-xl font-bold">Solace</span>
               </div>
               <p className="text-gray-400">Supporting mental health and well-being for everyone.</p>
             </div>
@@ -194,7 +194,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 MindCare. All rights reserved.</p>
+            <p>&copy; 2024 Solace. All rights reserved.</p>
           </div>
         </div>
       </footer>
