@@ -95,7 +95,7 @@ export default function ChatbotPage() {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-800">AI Assistant</h1>
+              <h1 className="text-xl font-semibold text-gray-800">Solace AI</h1>
               <p className="text-blue-600 text-sm">Always here to help</p>
             </div>
           </div>
