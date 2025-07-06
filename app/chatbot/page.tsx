@@ -31,8 +31,8 @@ export default function ChatbotPage() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent | React.KeyboardEvent) => {
+    if (e) e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
@@ -52,17 +52,18 @@ export default function ChatbotPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage.content }),
       });
+
       const data = await res.json();
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.reply,
+        content: data.reply || "I'm sorry, I couldn't generate a response.",
         role: "assistant",
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
-    } catch (err) {
+    } catch (error) {
       setMessages((prev) => [
         ...prev,
         {
@@ -77,29 +78,35 @@ export default function ChatbotPage() {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <div className="container mx-auto max-w-4xl h-screen flex flex-col">
-        {/* Header */}
-        <header className="bg-white/10 backdrop-blur-sm border-b border-white/20 p-4">
+    <div className="fixed inset-0 top-20 bg-white flex flex-col overflow-hidden">
+      {/* Header */}
+      <header className="bg-blue-50 border-b border-blue-200 p-7  w-full flex-shrink-0">
+        <div className="container mx-auto max-w-4xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-white">AI Assistant</h1>
-              <p className="text-blue-200 text-sm">Always here to help</p>
+              <h1 className="text-xl font-semibold text-gray-800">AI Assistant</h1>
+              <p className="text-blue-600 text-sm">Always here to help</p>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="container mx-auto max-w-4xl p-4 space-y-4">
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
+            <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               {message.role === "assistant" && (
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <Bot className="w-4 h-4 text-white" />
@@ -114,11 +121,7 @@ export default function ChatbotPage() {
                 }`}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
-                <p
-                  className={`text-xs mt-2 ${
-                    message.role === "user" ? "text-blue-100" : "text-gray-500"
-                  }`}
-                >
+                <p className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"}`}>
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -141,15 +144,9 @@ export default function ChatbotPage() {
               </div>
               <div className="bg-white rounded-2xl rounded-bl-sm shadow-lg px-4 py-3">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                 </div>
               </div>
             </div>
@@ -157,31 +154,34 @@ export default function ChatbotPage() {
 
           <div ref={messagesEndRef} />
         </div>
+      </div>
 
-        {/* Input Area */}
-        <div className="bg-white/10 backdrop-blur-sm border-t border-white/20 p-4">
-          <form onSubmit={handleSubmit} className="flex gap-3">
+      {/* Input */}
+      <div className="bg-blue-50 border-t border-blue-200 p-4 w-full flex-shrink-0">
+        <div className="container mx-auto max-w-4xl">
+          <div className="flex gap-3">
             <div className="flex-1 relative">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
                 disabled={isLoading}
                 className="w-full px-4 py-3 bg-white rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-500 disabled:opacity-50"
               />
             </div>
             <button
-              type="submit"
+              onClick={() => handleSubmit()}
               disabled={!input.trim() || isLoading}
               className="w-12 h-12 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors duration-200"
             >
               <Send className="w-5 h-5 text-white" />
             </button>
-          </form>
+          </div>
 
-          <p className="text-center text-blue-200 text-xs mt-3">
-            Press Enter to send • AI responses are powered by OpenAI
+          <p className="text-center text-gray-600 text-xs mt-3">
+            Press Enter to send • AI responses powered by Cohere
           </p>
         </div>
       </div>

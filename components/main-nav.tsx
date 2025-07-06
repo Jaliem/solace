@@ -32,11 +32,9 @@ export function MainNav() {
           <Link href="/professionals" className="text-gray-600 hover:text-blue-600">
             Find Professionals
           </Link>
-          <Link href="/resources" className="text-gray-600 hover:text-blue-600">
-            Resources
-          </Link>
-          <Link href="/about" className="text-gray-600 hover:text-blue-600">
-            About
+    
+          <Link href="/chatbot" className="text-gray-600 hover:text-blue-600">
+            Solace AI
           </Link>
           <Link href="/emergency" className="text-red-600 hover:text-red-700 font-medium">
             Emergency Help
